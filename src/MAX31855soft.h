@@ -59,10 +59,10 @@
 #include <MAX31855.h>
 
 
-class MAX31855soft : public MAX31855
+class MAX31855soft : public max31855::MAX31855
 {
   public:
-   MAX31855soft(uint8_t cs, uint8_t so, uint8_t sck);
+   MAX31855soft(MAX31855 cs, uint8_t so, uint8_t sck);
 
    void     begin(void);
    int32_t  readRawData(void);

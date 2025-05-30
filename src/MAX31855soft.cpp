@@ -57,7 +57,7 @@
     sck - serial clock input
 */
 /**************************************************************************/
-MAX31855soft::MAX31855soft(uint8_t cs, uint8_t so, uint8_t sck) : MAX31855(cs)
+MAX31855soft::MAX31855soft(MAX31855 cs, uint8_t so, uint8_t sck) : max31855::MAX31855(cs)
 {
   _so  = so;  //sw miso
   _sck = sck; //sw sclk
