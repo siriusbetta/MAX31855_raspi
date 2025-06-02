@@ -68,7 +68,7 @@
 
 namespace max31855 {
 
-    MAX31855::MAX31855(std::shared_ptr<mcp32017::MCP23017> mcp) : mcp23017(mcp) {
+    MAX31855::MAX31855(std::unique_ptr<gpio_arduino> g) : gpio(std::move(g)) {
     }
 
     MAX31855::~MAX31855() {
@@ -119,10 +119,10 @@ namespace max31855 {
 
         if (rawValue == 0) return MAX31855_THERMOCOUPLE_READ_FAIL;
 
-        if (mcp23017->bitRead(rawValue, 16) == 1) {
-            if (mcp23017->bitRead(rawValue, 2) == 1) return MAX31855_THERMOCOUPLE_SHORT_TO_VCC;
-            else if (mcp23017->bitRead(rawValue, 1) == 1) return MAX31855_THERMOCOUPLE_SHORT_TO_GND;
-            else if (mcp23017->bitRead(rawValue, 0) == 1) return MAX31855_THERMOCOUPLE_NOT_CONNECTED;
+        if (bitRead(rawValue, 16) == 1) {
+            if (bitRead(rawValue, 2) == 1) return MAX31855_THERMOCOUPLE_SHORT_TO_VCC;
+            else if (bitRead(rawValue, 1) == 1) return MAX31855_THERMOCOUPLE_SHORT_TO_GND;
+            else if (bitRead(rawValue, 0) == 1) return MAX31855_THERMOCOUPLE_NOT_CONNECTED;
             else return MAX31855_THERMOCOUPLE_UNKNOWN;
         }
         return MAX31855_THERMOCOUPLE_OK;
@@ -142,7 +142,7 @@ namespace max31855 {
         if (rawValue == MAX31855_FORCE_READ_DATA) rawValue = readRawData();
 
         if (rawValue == 0) return MAX31855_THERMOCOUPLE_READ_FAIL;
-        if (mcp23017->bitRead(rawValue, 17) == 0 && mcp23017->bitRead(rawValue, 3) == 0) return MAX31855_ID;
+        if (bitRead(rawValue, 17) == 0 && bitRead(rawValue, 3) == 0) return MAX31855_ID;
 
         return MAX31855_ERROR;
     }
@@ -247,16 +247,16 @@ namespace max31855 {
         uint8_t tx_buf[4]{0, 0, 0, 0};
         //uint8_t rx_buf[2] {0, 0 };
         //uint8_t tx_buf[2] {0, 0};
-        mcp23017->digitalWrite(_cs, LOW);                                          //stop  measurement/conversion
+        gpio->digitalWrite(_cs, LOW);                                          //stop  measurement/conversion
         usleep(1);
         //delayMicroseconds(1);                                            //pulse fall time > 100nS
-        mcp23017->digitalWrite(_cs, HIGH);                                         //start measurement/conversion
+        gpio->digitalWrite(_cs, HIGH);                                         //start measurement/conversion
 
         delay(MAX31855_CONVERSION_TIME);
 
         //SPI.beginTransaction(SPISettings(5000000, MSBFIRST, SPI_MODE0)); //up to 5MHz, read MSB first, SPI mode 0, see note
 
-        mcp23017->digitalWrite(_cs,
+        gpio->digitalWrite(_cs,
                                LOW);                                          //set software CS low to enable SPI interface for MAX31855
 
         spi_exchange(&_spi, rx_buf, tx_buf, sizeof(int32_t));
@@ -278,7 +278,7 @@ namespace max31855 {
         }
          */
 
-        mcp23017->digitalWrite(_cs,
+        gpio->digitalWrite(_cs,
                                HIGH);                                         //disables SPI interface for MAX31855, but it will initiate measurement/conversion
 
         //SPI.endTransaction();                                            //de-asserting hardware CS & free hw SPI for other slaves
@@ -309,15 +309,8 @@ namespace max31855 {
         _cs = cs;
     }
 
-    void MAX31855::addCS(uint8_t cs) {
-        mcp23017->pinMode(cs, OUTPUT);
-        mcp23017->digitalWrite(cs, HIGH);
-    }
-
-    void MAX31855::addCS(std::vector<uint8_t> &cs){
-        for(auto pin : cs){
-            addCS(pin);
-        }
+    bool MAX31855::bitRead(int32_t num, uint8_t index){
+      return (num >> index) & 1;
     }
 }
 

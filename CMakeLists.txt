@@ -4,7 +4,7 @@ project(max31855)
 set(SPI_SRC "spi/spi.c")
 add_library(spi STATIC ${SPI_SRC})
 
-set(SRC "src/MAX31855.cpp" src/gpio.cpp src/gpio.h)
+set(SRC "src/MAX31855.cpp" src/gpio.cpp src/gpio.h src/mcp23017_gpio.cpp src/mcp23017_gpio.h)
 
 add_subdirectory(MCP23017_raspi)
 

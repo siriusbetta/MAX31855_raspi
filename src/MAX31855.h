@@ -72,7 +72,8 @@
 #include <linux/spi/spidev.h>
 #include "spi.h"
 #include <map>
-#include "MCP23017.h"
+//#include "MCP23017.h"
+#include "mcp23017_gpio.h"
 
 #define SPI_DEVICE "/dev/spidev0.0"
 
@@ -103,7 +104,7 @@ class MAX31855
 {
   public:
    //MAX31855(uint8_t cs);
-   MAX31855(std::shared_ptr<mcp32017::MCP23017> mcp);
+   MAX31855(std::unique_ptr<gpio_arduino> g);
    ~MAX31855();
 
            void     begin(void);
@@ -115,16 +116,16 @@ class MAX31855
            void delay(unsigned int msec); //in milliseconds
            unsigned int reverseBits(unsigned int x, int k);
            void setCS(uint8_t cs);
-           void addCS(uint8_t cs);
-           void addCS(std::vector<uint8_t> &cs);
 
 private:
+  bool bitRead(int32_t num, uint8_t index);
 
-  protected:
+protected:
    uint8_t _cs;
    uint8_t _i2c_addr;
    uint8_t _bus;
-   std::shared_ptr<mcp32017::MCP23017> mcp23017;
+//   std::shared_ptr<mcp32017::MCP23017> mcp23017;
+  std::unique_ptr<gpio_arduino> gpio;
   spi_t _spi;
   char buf[1024];
 };
