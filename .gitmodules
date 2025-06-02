@@ -1,0 +1,6 @@
+[submodule "MCP23017_raspi"]
+	path = MCP23017_raspi
+	url = https://github.com/siriusbetta/MCP23017_raspi.git
+[submodule "spi"]
+	path = spi
+	url = https://github.com/azorg/spi.git
